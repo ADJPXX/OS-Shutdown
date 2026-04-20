@@ -5,14 +5,7 @@ namespace ShutdownCSharp;
 
 class Program
 {
-    enum Estado
-    {
-        Menu,
-        Desligamento,
-        Sair
-    }
-    
-    static Estado estado = Estado.Menu;
+    private static Estado estado = Estado.Menu;
 
     private static void Main(string[] args)
     {
