@@ -73,12 +73,13 @@ class Program
                     comando = "-a";
                     Timer(comando);
                     Console.WriteLine(
-                        "NÃO TINHA UM TIMER ATIVO, PARA VERIFICAÇÃO FOI ADICIONADO E LOGO APÓS CANCELADO UM TIMER DE 1 DIA");
+                        "NÃO TINHA UM TIMER ATIVO, PARA VERIFICAÇÃO FOI ADICIONADO UM TIMER DE 1 DIA E LOGO APÓS CANCELADO");
                 }
             }
         }
     }
 
+    
     private static int Timer(string comando)
     {
         try
@@ -109,6 +110,7 @@ class Program
         }
     }
 
+    
     private static void Desligamento()
     {
         int horas = -1;
@@ -172,47 +174,63 @@ class Program
 
         else if (exitCode != 1190)
         {
+            Console.Clear();
             TelaDesligamento(horas, minutos, segundos);
         }
     }
 
 
-    private static void TelaDesligamento(double horas, double minutos, double segundos)
+    private static void TelaDesligamento(int horas, int minutos, int segundos)
     {
-        
         while (true)
         {
-            Console.WriteLine($"DESLIGANDO EM: {horas}:{minutos}:{segundos}");
-            if (segundos == 0)
+            var total = (horas * 3600) + (minutos * 60) + segundos; 
+            
+            var agora = DateTime.Now;
+
+            var desligamento = agora.AddSeconds(total);
+
+            var horario = desligamento.ToString("HH:mm:ss");
+
+            Console.WriteLine("APERTE C PARA SAIR DESSA TELA!");
+            
+            Console.WriteLine($"O SISTEMA IRÁ DESLIGAR AS: {horario}");
+            
+            Console.WriteLine($"DESLIGANDO EM: {horas:00}:{minutos:00}:{segundos:00}");
+
+            if (Console.KeyAvailable)
             {
-                if (minutos > 0)
+                if (Console.ReadKey().Key == ConsoleKey.C)
                 {
-                    minutos -= 1;
-                    segundos = 60;
+                    estado = Estado.Menu;
+                    return;
                 }
             }
 
-            if (minutos == 0)
+            if (segundos > 0)
+                segundos -= 1;
+
+            else if (minutos > 0)
             {
-                if (horas > 0)
-                {
-                    horas -= 1;
-                    minutos = 59;
-                }
+                minutos -= 1;
+                segundos = 59;
             }
             
-            segundos -= 1;
-            
-            /*Thread.Sleep(1000);*/
-            Console.ReadKey();
-            Console.Clear();
+            else if (horas > 0)
+            {
+                horas -= 1;
+                segundos = 59;
+                minutos = 59;
+            }
+
+            Thread.Sleep(1000);
+            Console.SetCursorPosition(0, 0);
 
             if (horas == 0 && minutos == 0 && segundos == 0)
             {
                 estado = Estado.Menu;
                 return;
             }
-
         }
     }
     
