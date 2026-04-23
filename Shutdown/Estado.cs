@@ -4,5 +4,6 @@ public enum Estado
 {
     Menu,
     Desligamento,
+    Reiniciar,
     Sair
 }

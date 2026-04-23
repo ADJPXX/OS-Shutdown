@@ -13,6 +13,7 @@ class Program
             switch (estado)
             {
                 case Estado.Menu: Menu(); break;
+                case Estado.Reiniciar: Reiniciar(); break;
                 case Estado.Desligamento: Desligamento(); break;
             }
     }
@@ -23,7 +24,7 @@ class Program
         Console.Clear();
         while (true)
         {
-            Console.Write("[1]COLOCAR UM TIMER PARA DESLIGAMENTO DO COMPUTADOR\n[2]CANCELAR UM TIMER ATIVO\n[3]VERIFICAR SE EXISTE UM TIMER ATIVO\n[0]SAIR DO PROGRAMA\n");
+            Console.Write("[ 1 ]COLOCAR TIMER PARA DESLIGAR O COMPUTADOR\n[ 2 ]COLOCAR TIMER PARA REINICIAR O COMPUTADOR\n[ 3 ]CANCELAR UM TIMER ATIVO\n[ 4 ]VERIFICAR SE EXISTE UM TIMER ATIVO\n[ 0 ]SAIR DO PROGRAMA\n");
             int opcao = LerInt("SUA ESCOLHA: ");
             
             if (opcao == 0)
@@ -42,6 +43,13 @@ class Program
             
             else if (opcao == 2)
             {
+                estado = Estado.Reiniciar;
+                return;
+                
+            }
+            
+            else if (opcao == 3)
+            {
                 Console.Clear();
                 string comando = "-a";
                 
@@ -53,7 +61,7 @@ class Program
                     Console.WriteLine("TIMER DESATIVADO.");
             }
             
-            else if (opcao == 3)
+            else if (opcao == 4)
             {
                 Console.Clear();
                 string comando = "-s -t 86400";
@@ -65,8 +73,7 @@ class Program
                 {
                     comando = "-a";
                     Timer(comando);
-                    Console.WriteLine(
-                        "NÃO TINHA UM TIMER ATIVO, PARA VERIFICAÇÃO FOI ADICIONADO UM TIMER DE 1 DIA E LOGO APÓS CANCELADO");
+                    Console.WriteLine("NÃO TINHA UM TIMER ATIVO, PARA VERIFICAÇÃO FOI ADICIONADO UM TIMER DE 1 DIA E LOGO APÓS CANCELADO");
                 }
             }
         }
@@ -103,6 +110,75 @@ class Program
         }
     }
 
+
+    private static void Reiniciar()
+    {
+        int horas = -1;
+        int minutos = -1;
+        int segundos = -1;
+        
+        Console.Clear();
+                
+        while (horas < 0)
+        { 
+            horas = LerInt("DIGITE A QUANTIDADE DE HORAS PARA O COMPUTADOR REINICIAR: ");
+        }
+
+        while (minutos < 0)
+        {
+            minutos = LerInt("DIGITE A QUANTIDADE DE MINUTOS PARA O COMPUTADOR REINICIAR: ");
+        }
+
+        while (segundos < 0)
+        {
+            segundos = LerInt("DIGITE A QUANTIDADE DE SEGUNDOS PARA O COMPUTADOR REINICIAR: ");
+        }
+        
+        int total = (horas * 3600) + (minutos * 60) + segundos;
+        
+        if (segundos >= 60)
+        {
+            int inteiro = segundos / 60;
+            int resto = segundos % 60;
+            
+            minutos += inteiro;
+            segundos = resto;
+        }
+        
+        if (minutos >= 60)
+        {
+            int inteiro = minutos / 60;
+            int resto = minutos % 60;
+            
+            horas += inteiro;
+            minutos = resto;
+        }
+
+        if (horas == 0 && minutos == 0 && segundos == 0)
+        {
+            Console.Clear();
+            estado = Estado.Menu;
+            return;
+        }
+        
+        string comando = $"-r -t {total}";
+
+        int exitCode = Timer(comando);
+
+        if (exitCode == 1190)
+        {
+            Console.WriteLine("NÃO FOI POSSÍVEL COLOCAR O TIMER POIS JÁ EXISTE UM TIMER ATIVO");
+            estado = Estado.Menu;
+            return;
+        }
+
+        else if (exitCode != 1190)
+        {
+            Console.Clear();
+            TelaReiniciar(horas, minutos, segundos);
+        }
+    }
+    
     
     private static void Desligamento()
     {
@@ -190,6 +266,61 @@ class Program
             Console.WriteLine($"O SISTEMA IRÁ DESLIGAR AS: {horario}");
             
             Console.WriteLine($"DESLIGANDO EM: {horas:00}:{minutos:00}:{segundos:00}");
+
+            if (Console.KeyAvailable)
+            {
+                if (Console.ReadKey().Key == ConsoleKey.C)
+                {
+                    estado = Estado.Menu;
+                    return;
+                }
+            }
+
+            if (segundos > 0)
+                segundos -= 1;
+
+            else if (minutos > 0)
+            {
+                minutos -= 1;
+                segundos = 59;
+            }
+            
+            else if (horas > 0)
+            {
+                horas -= 1;
+                segundos = 59;
+                minutos = 59;
+            }
+
+            Thread.Sleep(1000);
+            Console.SetCursorPosition(0, 0);
+
+            if (horas == 0 && minutos == 0 && segundos == 0)
+            {
+                estado = Estado.Menu;
+                return;
+            }
+        }
+    }
+    
+    
+    private static void TelaReiniciar(int horas, int minutos, int segundos)
+    {
+        while (true)
+        {
+            var total = (horas * 3600) + (minutos * 60) + segundos; 
+            
+            var agora = DateTime.Now;
+
+            var reiniciar = agora.AddSeconds(total);
+
+            var horario = reiniciar.ToString("HH:mm:ss");
+
+            Console.WriteLine("APERTE C PARA SAIR DESSA TELA!");
+            
+            Console.WriteLine($"O SISTEMA IRÁ REINICIAR AS: {horario}");
+            
+            Console.WriteLine($"REINICIANDO EM: {horas:00}:{minutos:00}:{segundos:00}");
 
             if (Console.KeyAvailable)
             {
